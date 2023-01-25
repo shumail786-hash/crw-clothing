@@ -1,5 +1,11 @@
 import {initializeApp} from 'firebase/app'
-import {getAuth, signInWithPopup, signInWithRedirect, GoogleAuthProvider} from 'firebase/auth'
+import {getAuth,
+    signInWithPopup,
+    signInWithRedirect,
+    GoogleAuthProvider,
+    createUserWithEmailAndPassword
+  } from 'firebase/auth'
+
 import {getFirestore, doc, setDoc, getDoc} from 'firebase/firestore'
 
 const firebaseConfig = {
@@ -13,32 +19,41 @@ const firebaseConfig = {
 
  const firebaseApp = initializeApp(firebaseConfig);
 
- const provider = new GoogleAuthProvider()
- provider.setCustomParameters({
+ const googleProvider = new GoogleAuthProvider()
+ googleProvider.setCustomParameters({
   prompt:"select_account"
  });
 
  export const auth = getAuth()
 
-//  Anonymous Function
- export const signInWithGooglePopUp = ()=> signInWithPopup(auth, provider)
+//  Signing In with Google Pop Up - Below function is called Anonymous Function
+ export const signInWithGooglePopUp = ()=> signInWithPopup(auth, googleProvider)
+
+//  Sigining In with Redirect
+
+export const signInWithGoogleRedirect = ()=> signInWithRedirect(auth, googleProvider)
+
 
 //  Making Database
 export const db = getFirestore()
-export const createUserDocumentFromAuth = async (userAuth)=>{
+export const createUserDocumentFromAuth = async (userAuth, additionalInformation = {})=>{
+
+  if(!userAuth) return;
   // Provide Reference of the document.
   // If Document not created, Google will create it automatically for you
   // Doc require three params: 1. Database 2. Document Reference 3. Unique Identifier
   const userDocRef = doc(db, "users", userAuth.uid)
 
-  console.log(userDocRef)
+  // console.log(userDocRef)
   const userSnapShot = await getDoc(userDocRef)
+  // console.log(userSnapShot)
 
-  console.log(userSnapShot)
   // Exist Method will check whether your document exist in database or not.
   // Therefor, it will return true or false.
-  console.log(userSnapShot.exists())
+  
+  // console.log(userSnapShot.exists())
 
+  
   // If User does not exist in database.
   if(!userSnapShot.exists()){
     const {displayName, email} = userAuth
@@ -47,7 +62,8 @@ export const createUserDocumentFromAuth = async (userAuth)=>{
       await setDoc(userDocRef, {
         displayName,
         email,
-        createdAt
+        createdAt,
+        ...additionalInformation
       })
       
     } catch (error) {
@@ -57,6 +73,8 @@ export const createUserDocumentFromAuth = async (userAuth)=>{
     // If User Exist in Database then simply return it
     return userDocRef
   }
-
-
+}
+export const createUserAuthFromEmailAndPassword = async (email,password)=>{
+  if(!email || !password) return;
+  return await createUserWithEmailAndPassword(auth, email, password)
 }
