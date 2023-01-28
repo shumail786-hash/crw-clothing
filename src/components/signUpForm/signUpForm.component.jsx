@@ -4,7 +4,6 @@ import {
   createUserDocumentFromAuth,
 } from "../../utils/firebase/firebase.utils";
 import "./signUpForm.component.scss";
-
 import FormInput from "../formInput/formInput.component";
 import Button from "../button/button.component";
 
@@ -20,7 +19,6 @@ const SignUpForm = () => {
   // Destructure becuase they are going to use in our code.
   // We just enter "email" instead of formFields.email
   const { displayName, email, password, confirmPassword } = formFields;
-
   const handleChange = (event) => {
     const { name, value } = event.target;
     setformFields({
