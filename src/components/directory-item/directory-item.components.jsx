@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import "./directory-item.styles.scss";
 const DirectoryItem = ({ category }) => {
   const { title, imageUrl } = category;
@@ -11,7 +12,9 @@ const DirectoryItem = ({ category }) => {
         }}
       />
       <div className="directory-item-body">
-        <h2>{title}</h2>
+        <Link to={`/shop/${title.toLowerCase()}`}>
+          <h2>{title}</h2>
+        </Link>
       </div>
     </div>
   );
