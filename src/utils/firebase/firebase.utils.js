@@ -9,7 +9,7 @@ import {getAuth,
     onAuthStateChanged
   } from 'firebase/auth'
 
-import {getFirestore, doc, setDoc, getDoc} from 'firebase/firestore'
+import {getFirestore, doc, setDoc, getDoc, collection, writeBatch, query, getDocs} from 'firebase/firestore'
 
 const firebaseConfig = {
     apiKey: "AIzaSyD23Szg8X16VLA9RdYb3WTgMtiOY37dbQs",
@@ -39,6 +39,38 @@ export const signInWithGoogleRedirect = ()=> signInWithRedirect(auth, googleProv
 
 //  Making Database
 export const db = getFirestore()
+
+export const addCollectionAndDocuments = async (collectionKey, objectsToAdd)=>{
+
+  const collectionRef = collection(db, collectionKey);
+  const batch = writeBatch(db)
+
+  objectsToAdd.forEach((object)=>{
+    const docRef = doc(collectionRef, object.title.toLowerCase());
+    batch.set(docRef, object)
+  })
+  await batch.commit()
+  console.log('done')
+}
+
+
+// Making Categories Map Function
+
+
+export const getCategoriesAndDocuments = async () => {
+  const collectionRef = collection(db, 'categories')
+  const q = query(collectionRef)
+  
+  const querySnapShot = await getDocs(q)
+  const categoryMap = querySnapShot.docs.reduce((acc, docSnapShot)=>{
+    const { title, items } = docSnapShot.data();
+    acc[title.toLowerCase()] = items
+    return acc
+  },{})
+
+  return categoryMap
+}
+
 export const createUserDocumentFromAuth = async (userAuth, additionalInformation = {})=>{
 
   if(!userAuth) return;
